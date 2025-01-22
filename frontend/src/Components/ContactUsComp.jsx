@@ -8,109 +8,102 @@ import {
 } from "@mui/material";
 import { Snackbar, Alert } from "@mui/material";
 import { Element } from "react-scroll";
-import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
-import L from "leaflet";
-import "leaflet/dist/leaflet.css";
-import axios from "axios";
-
-function SetView({ coords }) {
-  const map = useMap();
-  useEffect(() => {
-    map.setView(coords, 15); // Adjust zoom level here
-  }, [coords, map]);
-  return null;
-}
 
 function ContactUsComp() {
   useEffect(() => {
-    // Scroll to top when the component mounts
     window.scrollTo(0, 0);
   }, []);
 
-  const coords = [15.452990963271466, 75.01120148913052];
-
-  // Define state variables for the form inputs and loading state
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [subject, setSubject] = useState("");
-  const [message, setMessage] = useState("");
-  const [loading, setLoading] = useState(false); // Loading state
-  const [showLoader, setShowLoader] = useState(false); // Loader visibility state
-  const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackMessage, setsnackMessage] = useState("");
-  const [snackseverity, setsnackseverity] = useState("");
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    subject: "",
+    message: ""
+  });
+  const [loading, setLoading] = useState(false);
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success"
+  });
 
   const inputStyles = {
     sx: { padding: "0.5rem 0" },
     InputProps: {
-      sx: { fontSize: "1.2rem" }, // Adjust the font size of the value
+      sx: { fontSize: "1.2rem" },
     },
   };
 
-  const handleSubmit = (e) => {
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const resetForm = () => {
+    setFormData({
+      name: "",
+      email: "",
+      subject: "",
+      message: ""
+    });
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (
-      name.trim() === "" ||
-      email.trim() === "" ||
-      subject.trim() === "" ||
-      message.trim() === ""
-    ) {
-      setsnackMessage("All fields are required");
-      setsnackseverity("error");
-      setSnackbarOpen(true);
+
+    // Validate all fields
+    if (Object.values(formData).some(field => field.trim() === "")) {
+      setSnackbar({
+        open: true,
+        message: "All fields are required",
+        severity: "error"
+      });
       return;
     }
 
     setLoading(true);
-    setShowLoader(true);
 
-    // Set a timeout to show the loader after 1.5 seconds
-    const loaderTimeout = setTimeout(() => {
-      setShowLoader(true);
-    }, 1500);
-
-    // Log the input values
-    axios
-      .post(`${BACKEND_URL}/userMessages`, {
-        name,
-        email,
-        subject,
-        message,
-      })
-      .then((res) => {
-        setsnackMessage("Your message has been sent!");
-        setsnackseverity("success");
-        setSnackbarOpen(true);
-        setTimeout(() => {
-          setSnackbarOpen(false);
-        }, 2200);
-        setName("");
-        setEmail("");
-        setSubject("");
-        setMessage("");
-      })
-      .catch((err) => {
-        setsnackMessage("Failed to send message");
-        setsnackseverity("error");
-        setSnackbarOpen(true);
-        setTimeout(() => {
-          setSnackbarOpen(false);
-        }, 2200);
-        console.log("Error storing user feedback: ", err);
-      })
-      .finally(() => {
-        setLoading(false);
-        setShowLoader(false);
-        clearTimeout(loaderTimeout); // Clear the timeout if the request finishes before 1.5 seconds
+    try {
+      const response = await fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          access_key: "c6938112-db86-4e30-a9a7-ab9414c144c9",
+          ...formData
+        })
       });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setSnackbar({
+          open: true,
+          message: "Your message has been sent successfully!",
+          severity: "success"
+        });
+        resetForm();
+      } else {
+        throw new Error("Failed to send message");
+      }
+    } catch (error) {
+      setSnackbar({
+        open: true,
+        message: "Failed to send message. Please try again later.",
+        severity: "error"
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSnackbarClose = (event, reason) => {
-    if (reason === "clickaway") {
-      return;
-    }
-    setSnackbarOpen(false);
+    if (reason === "clickaway") return;
+    setSnackbar(prev => ({ ...prev, open: false }));
   };
 
   return (
@@ -159,16 +152,18 @@ function ContactUsComp() {
               <TextField
                 sx={{ width: "100%" }}
                 label="Name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
                 variant="standard"
                 {...inputStyles}
               />
               <TextField
                 sx={{ width: "100%" }}
                 label="Email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
                 variant="standard"
                 type="email"
                 {...inputStyles}
@@ -176,16 +171,18 @@ function ContactUsComp() {
               <TextField
                 sx={{ width: "100%" }}
                 label="Subject"
-                value={subject}
-                onChange={(e) => setSubject(e.target.value)}
+                name="subject"
+                value={formData.subject}
+                onChange={handleChange}
                 variant="standard"
                 {...inputStyles}
               />
               <TextField
                 sx={{ width: "100%" }}
                 label="Message"
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
+                name="message"
+                value={formData.message}
+                onChange={handleChange}
                 variant="standard"
                 multiline
                 rows={5}
@@ -197,26 +194,20 @@ function ContactUsComp() {
                 type="submit"
                 variant="contained"
                 sx={{ width: "100%", mb: "1rem" }}
-                onClick={handleSubmit}
-                disabled={loading} // Disable button when loading
+                disabled={loading}
               >
-                {showLoader ? (
-                  <CircularProgress size={24} sx={{ color: "#fff" }} /> // Show loader with delay
+                {loading ? (
+                  <CircularProgress size={24} sx={{ color: "#fff" }} />
                 ) : (
                   "Submit"
                 )}
               </Button>
               <Button
-                type="reset"
+                type="button"
                 variant="outlined"
                 sx={{ width: "100%" }}
-                onClick={() => {
-                  setName("");
-                  setEmail("");
-                  setSubject("");
-                  setMessage("");
-                }}
-                disabled={loading} // Disable button when loading
+                onClick={resetForm}
+                disabled={loading}
               >
                 Reset
               </Button>
@@ -226,9 +217,7 @@ function ContactUsComp() {
 
         {/* Right Side: Map */}
         <Box>
-          <Box
-            sx={{ display: "flex", flexDirection: "column", height: "22rem" }}
-          >
+          <Box sx={{ display: "flex", flexDirection: "column", height: "22rem" }}>
             <Box
               sx={{
                 flex: 1,
@@ -262,18 +251,18 @@ function ContactUsComp() {
         </Box>
       </Box>
       <Snackbar
-        open={snackbarOpen}
+        open={snackbar.open}
         autoHideDuration={6000}
         onClose={handleSnackbarClose}
         anchorOrigin={{ vertical: "top", horizontal: "right" }}
       >
         <Alert
           onClose={handleSnackbarClose}
-          severity={snackseverity}
+          severity={snackbar.severity}
           variant="filled"
           sx={{ width: "100%" }}
         >
-          {snackMessage}
+          {snackbar.message}
         </Alert>
       </Snackbar>
     </Element>
