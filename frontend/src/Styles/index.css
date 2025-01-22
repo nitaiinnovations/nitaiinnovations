@@ -1,0 +1,64 @@
+@import url('https://fonts.googleapis.com/css2?family=Josefin+Sans:ital,wght@0,100..700;1,100..700');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: 'Georgia';
+  font-style: normal;
+  font-weight: normal;
+  src: local('Georgia Regular'), url('./Fonts/georgia.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'Cambria';
+  font-style: normal;
+  font-weight: normal;
+  src: local('Cambria'), url('./Fonts/Cambria.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'CambriaMath';
+  font-style: normal;
+  font-weight: normal;
+  src: local('CambriaMath'), url('./Fonts/CambriaMath.woff') format('tff');
+}
+
+@font-face {
+  font-family: 'TimesNewRoman';
+  font-style: normal;
+  font-weight: normal;
+  src: local('TimesNewRoman'), url('./Fonts/TimesNewRoman.woff') format('ttf');
+}
+
+
+
+/* Headings */
+h1{
+  font-family: 'TimesNewRoman' !important;
+  font-size: 3rem !important;
+  font-weight: bolder;
+}
+
+/* Sub-headings */
+label, h2{
+  font-family: 'Georgia' !important;
+  font-size: 1.3rem !important;
+}
+
+/* Paragraphs */
+a, button,span, p{
+  font-family: 'CambriaMath' !important;
+  font-size: 1.2rem !important;
+  line-height: 1.8rem;
+}
+
+/* Sub-Paragraphs */
+h6 {
+  font-family: 'Cambria' !important;
+  font-size: 1rem !important;
+}
+
+
+  

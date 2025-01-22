@@ -1,0 +1,23 @@
+.contactUs{
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  padding: 3rem;
+}
+.contactUs h3{
+  font-size: 1rem;
+  color: rgba(0, 0, 0, 0.461);
+  text-align: center;
+}
+.leftContactUs{
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
+  align-items: flex-start;
+  flex-direction: column;
+}
+
+.btnsContainer{
+  display: flex;
+  gap: 2rem;
+}
